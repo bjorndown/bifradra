@@ -31,6 +31,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.7.tgz#01e4ea724d9e3bd50d90c11fd5980ba317d8fa11"
   integrity sha512-E6Zn0rffhgd130zbCbAr/JdXfXkoOUFAKNs/rF8qnafSJ8KYaA/j3oz7dcwal+lYjLA7xvdd5J4wdYpCTlP8+w==
 
+"@types/raphael@2.1.30":
+  version "2.1.30"
+  resolved "https://registry.yarnpkg.com/@types/raphael/-/raphael-2.1.30.tgz#76cbea4a556ba25eb1c6d7fa5e71ac48e72f81cf"
+  integrity sha1-dsvqSlVrol6xxtf6XnGsSOcvgc8=
+
 "@types/source-list-map@*":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@types/source-list-map/-/source-list-map-0.1.2.tgz#0078836063ffaf17412349bba364087e0ac02ec9"

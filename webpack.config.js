@@ -28,7 +28,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Output Management',
+      title: 'Bicycle Frame Geometry Drawer',
       inject: false,
       template: require('html-webpack-template'),
       appMountId: 'frame-geo-viz',
