@@ -4,38 +4,40 @@ type Mm = number;
 type Px = number;
 type Dg = number;
 
-class FrameGeometry {
-    public chainstayLength: Mm
-    public seatTubeLength: Mm
-    public seatTubeAngle: Dg
-    public bbDrop: Mm
-    public topTubeLength: Mm
-    public headTubeLength: Mm
-    public headTubeAngle: Dg
+interface FrameGeometry {
+    readonly chainstayLength: Mm
+    readonly seatTubeLength: Mm
+    readonly seatTubeAngle: Dg
+    readonly bbDrop: Mm
+    readonly topTubeLength: Mm
+    readonly headTubeLength: Mm
+    readonly headTubeAngle: Dg
 
-    public stack: Mm
-    public reach: Mm
+    readonly stack: Mm
+    readonly reach: Mm
 
-    public seatStayOffset: Mm
-    public topTubeSeatOffset: Mm
-    public topTubeHeadOffset: Mm
-    public downTubeHeadOffset: Mm
+    readonly seatStayOffset: Mm
+    readonly topTubeSeatOffset: Mm
+    readonly topTubeHeadOffset: Mm
+    readonly downTubeHeadOffset: Mm
 }
 
-class Line {
-    constructor(public start: Point, public end: Point) { }
+interface Line {
+    readonly start: Point
+    readonly end: Point
 }
 
-class Point {
-    constructor(public x: Px, public y: Px) { }
+function line(start: Point, end: Point): Line {
+    return { start, end }
 }
 
-function throwIfAnyNaN(frameGeometry: FrameGeometry): void {
-    for (const fieldName of Object.getOwnPropertyNames(frameGeometry)) {
-        if (isNaN((frameGeometry as any)[fieldName])) {
-            throw new Error(`Field ${fieldName} is NaN`)
-        }
-    }
+interface Point {
+    readonly x: Px
+    readonly y: Px
+}
+
+function point(x: Px, y: Px) {
+    return { x, y }
 }
 
 function square(x: number): number {
@@ -51,28 +53,28 @@ function rad(angleInDegrees: Dg): number {
 }
 
 function moveAlongLine(line: Line, alpha: Dg, distance: Mm): Point {
-    return new Point(0, 0)
+    return point(0, 0)
 }
 
 function computeChainstay(frameGeometry: FrameGeometry, origin: Point): Line {
     const y = scale(frameGeometry.bbDrop)
     const x = Math.sqrt(square(scale(frameGeometry.chainstayLength)) - square(scale(frameGeometry.bbDrop)))
-    return new Line(new Point(origin.x, origin.y), new Point(origin.x + x, origin.y + y))
+    return line(point(origin.x, origin.y), point(origin.x + x, origin.y + y))
 }
 
 function computeSeatTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
     const a = scale(frameGeometry.seatTubeLength) * Math.sin(rad(frameGeometry.seatTubeAngle))
     const b = scale(frameGeometry.seatTubeLength) * Math.cos(rad(frameGeometry.seatTubeAngle))
-    return new Line(new Point(bbCenter.x, bbCenter.y), new Point(bbCenter.x - b, bbCenter.y - a))
+    return line(point(bbCenter.x, bbCenter.y), point(bbCenter.x - b, bbCenter.y - a))
 }
 
 // TODO sort out scaling
 function computeHeadTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
-    const headTubeStart = new Point(bbCenter.x + scale(frameGeometry.reach), bbCenter.y - scale(frameGeometry.stack))
+    const headTubeStart = point(bbCenter.x + scale(frameGeometry.reach), bbCenter.y - scale(frameGeometry.stack))
     const a = scale(frameGeometry.headTubeLength) * Math.sin(rad(frameGeometry.headTubeAngle))
     const b = scale(frameGeometry.headTubeLength) * Math.cos(rad(frameGeometry.headTubeAngle))
-    const headTubeEnd = new Point(headTubeStart.x + b, headTubeStart.y + a)
-    return new Line(headTubeStart, headTubeEnd)
+    const headTubeEnd = point(headTubeStart.x + b, headTubeStart.y + a)
+    return line(headTubeStart, headTubeEnd)
 }
 
 function drawLine(paper: RaphaelPaper, line: Line): RaphaelElement {
@@ -85,20 +87,24 @@ function drawLine(paper: RaphaelPaper, line: Line): RaphaelElement {
 }
 
 const SCALE = 1 / 5
-const origin = new Point(10, 290)
+const origin = point(10, 290)
 const paper = Raphael('frame-geo-viz', 800, 400)
 
-const renegadeExploit = new FrameGeometry()
-renegadeExploit.chainstayLength = 430
-renegadeExploit.bbDrop = 72
-renegadeExploit.seatTubeLength = 560
-renegadeExploit.seatTubeAngle = 73
-renegadeExploit.headTubeAngle = 71.5
-renegadeExploit.headTubeLength = 163
-renegadeExploit.stack = 595
-renegadeExploit.reach = 387
-
-throwIfAnyNaN(renegadeExploit)
+const renegadeExploit: FrameGeometry = {
+    chainstayLength: 430,
+    bbDrop: 72,
+    seatTubeLength: 560,
+    seatTubeAngle: 73,
+    headTubeAngle: 71.5,
+    headTubeLength: 163,
+    stack: 595,
+    reach: 387,
+    topTubeLength: 570,
+    seatStayOffset: 0,
+    topTubeHeadOffset: 0,
+    topTubeSeatOffset: 0,
+    downTubeHeadOffset: 0
+}
 
 const chainstay = computeChainstay(renegadeExploit, origin)
 const seatTube = computeSeatTube(renegadeExploit, chainstay.end)
