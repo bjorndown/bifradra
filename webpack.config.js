@@ -1,18 +1,23 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+
 
 module.exports = {
   mode: 'development',
-
   entry: './src/index.ts',
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        test: /\.vue$/,
+        loader: 'vue-loader'
       },
+      {
+        test: /\.ts$/,
+        loader: "ts-loader",
+        options: { appendTsSuffixTo: [/\.vue$/] }
+      }
     ],
   },
   resolve: {
@@ -26,12 +31,13 @@ module.exports = {
     contentBase: './dist',
   },
   plugins: [
+    new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'Bicycle Frame Geometry Drawer',
       inject: false,
       template: require('html-webpack-template'),
-      appMountId: 'frame-geo-viz',
+      appMountId: 'app',
       mobile: true
     }),
   ]
