@@ -70,20 +70,36 @@ function computeSeatTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
 
 function computeHeadTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
     const headTubeStart = point(bbCenter.x + scale(frameGeometry.reach), bbCenter.y - scale(frameGeometry.stack))
-    const headTubeEnd = moveAlongLine(headTubeStart, frameGeometry.headTubeAngle, frameGeometry.headTubeLength)
+    const headTubeEnd = moveAlongLine(headTubeStart, frameGeometry.headTubeAngle, -frameGeometry.headTubeLength)
     return line(headTubeStart, headTubeEnd)
+}
+
+function computeTopTube(frameGeometry: FrameGeometry, headTubeStart: Point, seatTubeTop: Point): Line {
+    const topTubeStart = moveAlongLine(seatTubeTop, frameGeometry.seatTubeAngle, -frameGeometry.topTubeSeatOffset)
+    const topTubeEnd = moveAlongLine(headTubeStart, frameGeometry.headTubeAngle, -frameGeometry.topTubeHeadOffset)
+    return line(topTubeStart, topTubeEnd)
+}
+
+function computeDownTube(frameGeometry: FrameGeometry, headTubeEnd: Point, bbCenter: Point): Line {
+    const downTubeStart = moveAlongLine(headTubeEnd, frameGeometry.headTubeAngle, frameGeometry.downTubeHeadOffset)
+    return line(downTubeStart, point(bbCenter.x, bbCenter.y))
+}
+
+function computeSeatStay(frameGeometry: FrameGeometry, seatTubeEnd: Point, chainstayStart: Point): Line {
+    const seatStayStart = moveAlongLine(seatTubeEnd, frameGeometry.seatTubeAngle, -frameGeometry.seatStayOffset)
+    return line(point(chainstayStart.x, chainstayStart.y), seatStayStart)
 }
 
 function drawLine(paper: RaphaelPaper, line: Line): RaphaelElement {
     const pathString = `M${line.start.x} ${line.start.y}L${line.end.x} ${line.end.y}`
     const lineElement = paper.path(pathString)
-    lineElement.attr('stroke-width', 5)
+    lineElement.attr('stroke-width', 2)
     lineElement.attr('stroke-linecap', 'round')
     lineElement.attr('fill-opacity', 0.5)
     return lineElement
 }
 
-const SCALE = 1 / 5
+const SCALE = 1 / 2
 const origin = point(10, 290)
 const paper = Raphael('frame-geo-viz', 800, 400)
 
@@ -97,16 +113,22 @@ const renegadeExploit: FrameGeometry = {
     stack: 595,
     reach: 387,
     topTubeLength: 570,
-    seatStayOffset: 0,
-    topTubeHeadOffset: 0,
-    topTubeSeatOffset: 0,
-    downTubeHeadOffset: 0
+    seatStayOffset: 20,
+    topTubeHeadOffset: 20,
+    topTubeSeatOffset: 20,
+    downTubeHeadOffset: 20
 }
 
 const chainstay = computeChainstay(renegadeExploit, origin)
 const seatTube = computeSeatTube(renegadeExploit, chainstay.end)
 const headTube = computeHeadTube(renegadeExploit, chainstay.end)
+const topTube = computeTopTube(renegadeExploit, headTube.start, seatTube.end)
+const downTube = computeDownTube(renegadeExploit, headTube.end, chainstay.end)
+const seatStay = computeSeatStay(renegadeExploit, seatTube.end, chainstay.start)
 
 drawLine(paper, chainstay)
 drawLine(paper, seatTube)
 drawLine(paper, headTube)
+drawLine(paper, topTube)
+drawLine(paper, downTube)
+drawLine(paper, seatStay)
