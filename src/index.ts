@@ -12,7 +12,6 @@ interface FrameGeometry {
     readonly topTubeLength: Mm
     readonly headTubeLength: Mm
     readonly headTubeAngle: Dg
-
     readonly stack: Mm
     readonly reach: Mm
 
@@ -52,8 +51,10 @@ function rad(angleInDegrees: Dg): number {
     return Raphael.rad(angleInDegrees)
 }
 
-function moveAlongLine(line: Line, alpha: Dg, distance: Mm): Point {
-    return point(0, 0)
+function moveAlongLine(start: Point, alpha: Dg, distance: Mm): Point {
+    const a = scale(distance) * Math.sin(rad(alpha))
+    const b = scale(distance) * Math.cos(rad(alpha))
+    return point(start.x - b, start.y - a)
 }
 
 function computeChainstay(frameGeometry: FrameGeometry, origin: Point): Line {
@@ -63,17 +64,13 @@ function computeChainstay(frameGeometry: FrameGeometry, origin: Point): Line {
 }
 
 function computeSeatTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
-    const a = scale(frameGeometry.seatTubeLength) * Math.sin(rad(frameGeometry.seatTubeAngle))
-    const b = scale(frameGeometry.seatTubeLength) * Math.cos(rad(frameGeometry.seatTubeAngle))
-    return line(point(bbCenter.x, bbCenter.y), point(bbCenter.x - b, bbCenter.y - a))
+    const seatTubeTop = moveAlongLine(bbCenter, frameGeometry.seatTubeAngle, frameGeometry.seatTubeLength)
+    return line(point(bbCenter.x, bbCenter.y), seatTubeTop)
 }
 
-// TODO sort out scaling
 function computeHeadTube(frameGeometry: FrameGeometry, bbCenter: Point): Line {
     const headTubeStart = point(bbCenter.x + scale(frameGeometry.reach), bbCenter.y - scale(frameGeometry.stack))
-    const a = scale(frameGeometry.headTubeLength) * Math.sin(rad(frameGeometry.headTubeAngle))
-    const b = scale(frameGeometry.headTubeLength) * Math.cos(rad(frameGeometry.headTubeAngle))
-    const headTubeEnd = point(headTubeStart.x + b, headTubeStart.y + a)
+    const headTubeEnd = moveAlongLine(headTubeStart, frameGeometry.headTubeAngle, frameGeometry.headTubeLength)
     return line(headTubeStart, headTubeEnd)
 }
 
